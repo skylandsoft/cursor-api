@@ -1,0 +1,315 @@
+openapi: 3.1.0
+info:
+  title: Cursor Admin API
+  version: "1.0"
+  description: |
+    Programmatic access to team members, usage, spend, usage events, and repository blocklists.
+    Authentication uses Basic auth with the Admin API key as the username and an empty password.
+    Base URL: https://api.cursor.com
+servers:
+  - url: https://api.cursor.com
+security:
+  - basicAuth: [ ]
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    TeamMember:
+      type: object
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        role:
+          type: string
+          enum: [ owner, member, free-owner ]
+      required: [ name, email, role ]
+    TeamMembersResponse:
+      type: object
+      properties:
+        teamMembers:
+          type: array
+          items: { $ref: '#/components/schemas/TeamMember' }
+      required: [ teamMembers ]
+    DailyUsageRequest:
+      type: object
+      properties:
+        startDate: { type: integer, description: "Epoch milliseconds", minimum: 0 }
+        endDate: { type: integer, description: "Epoch milliseconds", minimum: 0 }
+      required: [ startDate, endDate ]
+    DailyUsageItem:
+      type: object
+      properties:
+        date: { type: integer, description: "Epoch milliseconds" }
+        isActive: { type: boolean }
+        totalLinesAdded: { type: number }
+        totalLinesDeleted: { type: number }
+        acceptedLinesAdded: { type: number }
+        acceptedLinesDeleted: { type: number }
+        totalApplies: { type: number }
+        totalAccepts: { type: number }
+        totalRejects: { type: number }
+        totalTabsShown: { type: number }
+        totalTabsAccepted: { type: number }
+        composerRequests: { type: number }
+        chatRequests: { type: number }
+        agentRequests: { type: number }
+        cmdkUsages: { type: number }
+        subscriptionIncludedReqs: { type: number }
+        apiKeyReqs: { type: number }
+        usageBasedReqs: { type: number }
+        bugbotUsages: { type: number }
+        mostUsedModel: { type: string }
+        applyMostUsedExtension: { type: string, nullable: true }
+        tabMostUsedExtension: { type: string, nullable: true }
+        clientVersion: { type: string, nullable: true }
+        email: { type: string, format: email, nullable: true }
+      required: [ date, isActive ]
+    DailyUsageResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/DailyUsageItem' }
+        period:
+          type: object
+          properties:
+            startDate: { type: integer }
+            endDate: { type: integer }
+          required: [ startDate, endDate ]
+      required: [ data, period ]
+    SpendRequest:
+      type: object
+      properties:
+        searchTerm: { type: string }
+        sortBy:
+          type: string
+          enum: [ amount, date, user ]
+          default: date
+        sortDirection:
+          type: string
+          enum: [ asc, desc ]
+          default: desc
+        page: { type: integer, minimum: 1, default: 1 }
+        pageSize: { type: integer, minimum: 1 }
+    SpendItem:
+      type: object
+      properties:
+        spendCents: { type: number }
+        fastPremiumRequests: { type: number }
+        name: { type: string }
+        email: { type: string, format: email }
+        role:
+          type: string
+          enum: [ owner, member, free-owner ]
+        hardLimitOverrideDollars: { type: number }
+      required: [ spendCents, name, email, role ]
+    SpendResponse:
+      type: object
+      properties:
+        teamMemberSpend:
+          type: array
+          items: { $ref: '#/components/schemas/SpendItem' }
+        subscriptionCycleStart: { type: integer, description: "Epoch ms" }
+        totalMembers: { type: integer }
+        totalPages: { type: integer }
+      required: [ teamMemberSpend, subscriptionCycleStart, totalMembers, totalPages ]
+    UsageEventsRequest:
+      type: object
+      properties:
+        startDate: { type: integer }
+        endDate: { type: integer }
+        userId: { type: integer }
+        email: { type: string, format: email }
+        page: { type: integer, minimum: 1, default: 1 }
+        pageSize: { type: integer, minimum: 1, default: 10 }
+    TokenUsage:
+      type: object
+      properties:
+        inputTokens: { type: number }
+        outputTokens: { type: number }
+        cacheWriteTokens: { type: number }
+        cacheReadTokens: { type: number }
+        totalCents: { type: number }
+    UsageEvent:
+      type: object
+      properties:
+        timestamp: { type: string }
+        model: { type: string }
+        kind: { type: string }
+        maxMode: { type: boolean }
+        requestsCosts: { type: number }
+        isTokenBasedCall: { type: boolean }
+        tokenUsage: { $ref: '#/components/schemas/TokenUsage' }
+        isFreeBugbot: { type: boolean }
+        userEmail: { type: string, format: email }
+    UsageEventsResponse:
+      type: object
+      properties:
+        totalUsageEventsCount: { type: integer }
+        pagination:
+          type: object
+          properties:
+            numPages: { type: integer }
+            currentPage: { type: integer }
+            pageSize: { type: integer }
+            hasNextPage: { type: boolean }
+            hasPreviousPage: { type: boolean }
+          required: [ numPages, currentPage, pageSize ]
+        usageEvents:
+          type: array
+          items: { $ref: '#/components/schemas/UsageEvent' }
+        period:
+          type: object
+          properties:
+            startDate: { type: integer }
+            endDate: { type: integer }
+          required: [ startDate, endDate ]
+      required: [ totalUsageEventsCount, pagination, usageEvents, period ]
+    SetUserSpendLimitRequest:
+      type: object
+      properties:
+        userEmail: { type: string, format: email }
+        spendLimitDollars: { type: integer, description: "Whole dollars; 0 sets a $0 limit" }
+      required: [ userEmail, spendLimitDollars ]
+    OutcomeResponse:
+      type: object
+      properties:
+        outcome:
+          type: string
+          enum: [ success, error ]
+        message: { type: string }
+      required: [ outcome, message ]
+    RepoBlocklist:
+      type: object
+      properties:
+        id: { type: string }
+        url: { type: string }
+        patterns:
+          type: array
+          items: { type: string }
+      required: [ id, url, patterns ]
+    RepoBlocklistsResponse:
+      type: object
+      properties:
+        repos:
+          type: array
+          items: { $ref: '#/components/schemas/RepoBlocklist' }
+      required: [ repos ]
+    UpsertRepoBlocklistsRequest:
+      type: object
+      properties:
+        repos:
+          type: array
+          items:
+            type: object
+            properties:
+              url: { type: string }
+              patterns:
+                type: array
+                items: { type: string }
+            required: [ url, patterns ]
+      required: [ repos ]
+paths:
+  /teams/members:
+    get:
+      summary: Get team members
+      security: [ { basicAuth: [ ] } ]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TeamMembersResponse' }
+  /teams/daily-usage-data:
+    post:
+      summary: Get daily usage data (≤90-day range)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DailyUsageRequest' }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DailyUsageResponse' }
+  /teams/spend:
+    post:
+      summary: Get current-cycle spend (search/sort/paginate)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SpendRequest' }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SpendResponse' }
+  /teams/filtered-usage-events:
+    post:
+      summary: Get detailed usage events (filterable & paginated)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UsageEventsRequest' }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UsageEventsResponse' }
+  /teams/user-spend-limit:
+    post:
+      summary: Set per-user spend limit
+      description: Rate limit ~60 requests/min per team.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SetUserSpendLimitRequest' }
+      responses:
+        "200":
+          description: Outcome
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OutcomeResponse' }
+  /settings/repo-blocklists/repos:
+    get:
+      summary: Get team repo blocklists
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepoBlocklistsResponse' }
+  /settings/repo-blocklists/repos/upsert:
+    post:
+      summary: Upsert repo blocklists for provided repos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpsertRepoBlocklistsRequest' }
+      responses:
+        "200":
+          description: Updated blocklists
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepoBlocklistsResponse' }
+  /settings/repo-blocklists/repos/{repoId}:
+    delete:
+      summary: Delete a repo from blocklist
+      parameters:
+        - in: path
+          name: repoId
+          required: true
+          schema: { type: string }
+      responses:
+        "204":
+          description: No Content

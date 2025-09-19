@@ -2,14 +2,10 @@ openapi: 3.1.0
 info:
   title: Cursor Admin API
   version: "1.0"
-  description: |
-    Programmatic access to team members, usage, spend, usage events, and repository blocklists.
-    Authentication uses Basic auth with the Admin API key as the username and an empty password.
-    Base URL: https://api.cursor.com
 servers:
   - url: https://api.cursor.com
 security:
-  - basicAuth: [ ]
+  - basicAuth: []
 components:
   securitySchemes:
     basicAuth:
@@ -21,27 +17,25 @@ components:
       properties:
         name: { type: string }
         email: { type: string, format: email }
-        role:
-          type: string
-          enum: [ owner, member, free-owner ]
-      required: [ name, email, role ]
+        role: { type: string, enum: [owner, member, free-owner] }
+      required: [name, email, role]
     TeamMembersResponse:
       type: object
       properties:
         teamMembers:
           type: array
           items: { $ref: '#/components/schemas/TeamMember' }
-      required: [ teamMembers ]
+      required: [teamMembers]
     DailyUsageRequest:
       type: object
       properties:
-        startDate: { type: integer, description: "Epoch milliseconds", minimum: 0 }
-        endDate: { type: integer, description: "Epoch milliseconds", minimum: 0 }
-      required: [ startDate, endDate ]
+        startDate: { type: integer, minimum: 0, description: "Epoch ms" }
+        endDate:   { type: integer, minimum: 0, description: "Epoch ms" }
+      required: [startDate, endDate]
     DailyUsageItem:
       type: object
       properties:
-        date: { type: integer, description: "Epoch milliseconds" }
+        date: { type: integer, description: "Epoch ms" }
         isActive: { type: boolean }
         totalLinesAdded: { type: number }
         totalLinesDeleted: { type: number }
@@ -65,7 +59,7 @@ components:
         tabMostUsedExtension: { type: string, nullable: true }
         clientVersion: { type: string, nullable: true }
         email: { type: string, format: email, nullable: true }
-      required: [ date, isActive ]
+      required: [date, isActive]
     DailyUsageResponse:
       type: object
       properties:
@@ -77,20 +71,14 @@ components:
           properties:
             startDate: { type: integer }
             endDate: { type: integer }
-          required: [ startDate, endDate ]
-      required: [ data, period ]
+          required: [startDate, endDate]
+      required: [data, period]
     SpendRequest:
       type: object
       properties:
         searchTerm: { type: string }
-        sortBy:
-          type: string
-          enum: [ amount, date, user ]
-          default: date
-        sortDirection:
-          type: string
-          enum: [ asc, desc ]
-          default: desc
+        sortBy: { type: string, enum: [amount, date, user], default: date }
+        sortDirection: { type: string, enum: [asc, desc], default: desc }
         page: { type: integer, minimum: 1, default: 1 }
         pageSize: { type: integer, minimum: 1 }
     SpendItem:
@@ -100,11 +88,9 @@ components:
         fastPremiumRequests: { type: number }
         name: { type: string }
         email: { type: string, format: email }
-        role:
-          type: string
-          enum: [ owner, member, free-owner ]
+        role: { type: string, enum: [owner, member, free-owner] }
         hardLimitOverrideDollars: { type: number }
-      required: [ spendCents, name, email, role ]
+      required: [spendCents, name, email, role]
     SpendResponse:
       type: object
       properties:
@@ -114,7 +100,7 @@ components:
         subscriptionCycleStart: { type: integer, description: "Epoch ms" }
         totalMembers: { type: integer }
         totalPages: { type: integer }
-      required: [ teamMemberSpend, subscriptionCycleStart, totalMembers, totalPages ]
+      required: [teamMemberSpend, subscriptionCycleStart, totalMembers, totalPages]
     UsageEventsRequest:
       type: object
       properties:
@@ -156,7 +142,7 @@ components:
             pageSize: { type: integer }
             hasNextPage: { type: boolean }
             hasPreviousPage: { type: boolean }
-          required: [ numPages, currentPage, pageSize ]
+          required: [numPages, currentPage, pageSize]
         usageEvents:
           type: array
           items: { $ref: '#/components/schemas/UsageEvent' }
@@ -165,22 +151,20 @@ components:
           properties:
             startDate: { type: integer }
             endDate: { type: integer }
-          required: [ startDate, endDate ]
-      required: [ totalUsageEventsCount, pagination, usageEvents, period ]
+          required: [startDate, endDate]
+      required: [totalUsageEventsCount, pagination, usageEvents, period]
     SetUserSpendLimitRequest:
       type: object
       properties:
         userEmail: { type: string, format: email }
         spendLimitDollars: { type: integer, description: "Whole dollars; 0 sets a $0 limit" }
-      required: [ userEmail, spendLimitDollars ]
+      required: [userEmail, spendLimitDollars]
     OutcomeResponse:
       type: object
       properties:
-        outcome:
-          type: string
-          enum: [ success, error ]
+        outcome: { type: string, enum: [success, error] }
         message: { type: string }
-      required: [ outcome, message ]
+      required: [outcome, message]
     RepoBlocklist:
       type: object
       properties:
@@ -189,14 +173,14 @@ components:
         patterns:
           type: array
           items: { type: string }
-      required: [ id, url, patterns ]
+      required: [id, url, patterns]
     RepoBlocklistsResponse:
       type: object
       properties:
         repos:
           type: array
           items: { $ref: '#/components/schemas/RepoBlocklist' }
-      required: [ repos ]
+      required: [repos]
     UpsertRepoBlocklistsRequest:
       type: object
       properties:
@@ -209,13 +193,14 @@ components:
               patterns:
                 type: array
                 items: { type: string }
-            required: [ url, patterns ]
-      required: [ repos ]
+            required: [url, patterns]
+      required: [repos]
 paths:
   /teams/members:
     get:
+      operationId: getTeamMembers
       summary: Get team members
-      security: [ { basicAuth: [ ] } ]
+      security: [{ basicAuth: [] }]
       responses:
         "200":
           description: OK
@@ -224,6 +209,7 @@ paths:
               schema: { $ref: '#/components/schemas/TeamMembersResponse' }
   /teams/daily-usage-data:
     post:
+      operationId: getDailyUsageData
       summary: Get daily usage data (≤90-day range)
       requestBody:
         required: true
@@ -238,6 +224,7 @@ paths:
               schema: { $ref: '#/components/schemas/DailyUsageResponse' }
   /teams/spend:
     post:
+      operationId: getTeamSpend
       summary: Get current-cycle spend (search/sort/paginate)
       requestBody:
         required: false
@@ -252,6 +239,7 @@ paths:
               schema: { $ref: '#/components/schemas/SpendResponse' }
   /teams/filtered-usage-events:
     post:
+      operationId: getFilteredUsageEvents
       summary: Get detailed usage events (filterable & paginated)
       requestBody:
         required: false
@@ -266,6 +254,7 @@ paths:
               schema: { $ref: '#/components/schemas/UsageEventsResponse' }
   /teams/user-spend-limit:
     post:
+      operationId: setUserSpendLimit
       summary: Set per-user spend limit
       description: Rate limit ~60 requests/min per team.
       requestBody:
@@ -281,6 +270,7 @@ paths:
               schema: { $ref: '#/components/schemas/OutcomeResponse' }
   /settings/repo-blocklists/repos:
     get:
+      operationId: listRepoBlocklists
       summary: Get team repo blocklists
       responses:
         "200":
@@ -290,6 +280,7 @@ paths:
               schema: { $ref: '#/components/schemas/RepoBlocklistsResponse' }
   /settings/repo-blocklists/repos/upsert:
     post:
+      operationId: upsertRepoBlocklists
       summary: Upsert repo blocklists for provided repos
       requestBody:
         required: true
@@ -304,6 +295,7 @@ paths:
               schema: { $ref: '#/components/schemas/RepoBlocklistsResponse' }
   /settings/repo-blocklists/repos/{repoId}:
     delete:
+      operationId: deleteRepoBlocklist
       summary: Delete a repo from blocklist
       parameters:
         - in: path

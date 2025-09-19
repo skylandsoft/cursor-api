@@ -2,15 +2,10 @@ openapi: 3.1.0
 info:
   title: Cursor AI Code Tracking API
   version: "0.1"
-  description: |
-    Access AI-generated code analytics for team repositories.
-    Provides per-commit metrics and granular accepted AI change metrics.
-    Alpha API; response shapes and fields may evolve.
-    Auth shares the same Basic scheme as the Admin API (API key as username).
 servers:
   - url: https://api.cursor.com
 security:
-  - basicAuth: [ ]
+  - basicAuth: []
 components:
   securitySchemes:
     basicAuth:
@@ -66,7 +61,7 @@ components:
         message: { type: string, nullable: true }
         commitTs: { type: string, format: date-time, nullable: true }
         createdAt: { type: string, format: date-time }
-      required: [ commitHash, userId, createdAt ]
+      required: [commitHash, userId, createdAt]
     PaginatedCommitResponse:
       type: object
       properties:
@@ -76,19 +71,19 @@ components:
         totalCount: { type: integer }
         page: { type: integer }
         pageSize: { type: integer }
-      required: [ items, totalCount, page, pageSize ]
+      required: [items, totalCount, page, pageSize]
     AiCodeChangeMetric:
       type: object
       properties:
         changeId: { type: string }
         userId: { type: string }
         userEmail: { type: string, format: email }
-        source: { type: string, enum: [ TAB, COMPOSER ] }
+        source: { type: string, enum: [TAB, COMPOSER] }
         model: { type: string, nullable: true }
         totalLinesAdded: { type: number }
         totalLinesDeleted: { type: number }
         createdAt: { type: string, format: date-time }
-      required: [ changeId, userId, userEmail, source, totalLinesAdded, totalLinesDeleted, createdAt ]
+      required: [changeId, userId, userEmail, source, totalLinesAdded, totalLinesDeleted, createdAt]
     PaginatedChangeResponse:
       type: object
       properties:
@@ -98,10 +93,11 @@ components:
         totalCount: { type: integer }
         page: { type: integer }
         pageSize: { type: integer }
-      required: [ items, totalCount, page, pageSize ]
+      required: [items, totalCount, page, pageSize]
 paths:
   /analytics/ai-code/commits:
     get:
+      operationId: listAiCommitMetrics
       summary: Get AI commit metrics (paginated)
       description: Rate limit ~5 requests/min per team per endpoint.
       parameters:
@@ -118,8 +114,8 @@ paths:
               schema: { $ref: '#/components/schemas/PaginatedCommitResponse' }
   /analytics/ai-code/commits.csv:
     get:
+      operationId: downloadAiCommitMetricsCsv
       summary: Download AI commit metrics (CSV)
-      description: Streamed CSV for large exports.
       parameters:
         - $ref: '#/components/parameters/startDate'
         - $ref: '#/components/parameters/endDate'
@@ -134,6 +130,7 @@ paths:
               schema: { type: string, format: binary }
   /analytics/ai-code/changes:
     get:
+      operationId: listAiCodeChangeMetrics
       summary: Get AI code change metrics (paginated)
       description: Rate limit ~5 requests/min per team per endpoint.
       parameters:
@@ -150,8 +147,8 @@ paths:
               schema: { $ref: '#/components/schemas/PaginatedChangeResponse' }
   /analytics/ai-code/changes.csv:
     get:
+      operationId: downloadAiCodeChangeMetricsCsv
       summary: Download AI code change metrics (CSV)
-      description: Streamed CSV for large exports.
       parameters:
         - $ref: '#/components/parameters/startDate'
         - $ref: '#/components/parameters/endDate'

@@ -1,0 +1,1025 @@
+openapi: 3.1.0
+info:
+  title: Cursor Admin & AI Code Tracking API
+  description: >
+    Access your team's data including member information, usage metrics, spending 
+    details, and AI-generated code analytics. The Admin API provides team management 
+    capabilities while the AI Code Tracking API offers insights into AI-generated 
+    code contributions across repositories.
+  version: 1.0.0
+  contact:
+    email: hi@cursor.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.cursor.com
+    description: Production server
+
+security:
+  - basicAuth: []
+
+paths:
+  /teams/members:
+    get:
+      operationId: getTeamMembers
+      summary: Get Team Members
+      description: Retrieve all team members and their details.
+      responses:
+        '200':
+          description: Successfully retrieved team members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  teamMembers:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: Member's name
+                        email:
+                          type: string
+                          description: Member's email address
+                        role:
+                          type: string
+                          enum: [owner, member, free-owner]
+                          description: Member's role in the team
+                      required:
+                        - name
+                        - email
+                        - role
+                required:
+                  - teamMembers
+              example:
+                teamMembers:
+                  - name: "Alex"
+                    email: "developer@company.com"
+                    role: "member"
+                  - name: "Sam"
+                    email: "admin@company.com"
+                    role: "owner"
+
+  /teams/daily-usage-data:
+    post:
+      operationId: getDailyUsageData
+      summary: Get Daily Usage Data
+      description: >
+        Retrieve detailed daily usage metrics for your team within a date range. 
+        Provides insights into code edits, AI assistance usage, and acceptance rates.
+        Date range cannot exceed 90 days.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: integer
+                  description: Start date in epoch milliseconds
+                endDate:
+                  type: integer
+                  description: End date in epoch milliseconds
+              required:
+                - startDate
+                - endDate
+            example:
+              startDate: 1710720000000
+              endDate: 1710892800000
+      responses:
+        '200':
+          description: Successfully retrieved daily usage data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: integer
+                          description: Date in epoch milliseconds
+                        isActive:
+                          type: boolean
+                          description: User active on this day
+                        totalLinesAdded:
+                          type: integer
+                          description: Lines of code added
+                        totalLinesDeleted:
+                          type: integer
+                          description: Lines of code deleted
+                        acceptedLinesAdded:
+                          type: integer
+                          description: Lines added from accepted AI suggestions
+                        acceptedLinesDeleted:
+                          type: integer
+                          description: Lines deleted from accepted AI suggestions
+                        totalApplies:
+                          type: integer
+                          description: Apply operations
+                        totalAccepts:
+                          type: integer
+                          description: Accepted suggestions
+                        totalRejects:
+                          type: integer
+                          description: Rejected suggestions
+                        totalTabsShown:
+                          type: integer
+                          description: Tab completions shown
+                        totalTabsAccepted:
+                          type: integer
+                          description: Tab completions accepted
+                        composerRequests:
+                          type: integer
+                          description: Composer requests
+                        chatRequests:
+                          type: integer
+                          description: Chat requests
+                        agentRequests:
+                          type: integer
+                          description: Agent requests
+                        cmdkUsages:
+                          type: integer
+                          description: Command palette (Cmd+K) uses
+                        subscriptionIncludedReqs:
+                          type: integer
+                          description: Subscription requests
+                        apiKeyReqs:
+                          type: integer
+                          description: API key requests
+                        usageBasedReqs:
+                          type: integer
+                          description: Pay-per-use requests
+                        bugbotUsages:
+                          type: integer
+                          description: Bug detection uses
+                        mostUsedModel:
+                          type: string
+                          description: Most frequent AI model
+                        applyMostUsedExtension:
+                          type: string
+                          nullable: true
+                          description: Most used file extension for applies
+                        tabMostUsedExtension:
+                          type: string
+                          nullable: true
+                          description: Most used file extension for tabs
+                        clientVersion:
+                          type: string
+                          nullable: true
+                          description: Cursor version
+                        email:
+                          type: string
+                          nullable: true
+                          description: User email
+                      required:
+                        - date
+                        - isActive
+                        - totalLinesAdded
+                        - totalLinesDeleted
+                        - acceptedLinesAdded
+                        - acceptedLinesDeleted
+                        - totalApplies
+                        - totalAccepts
+                        - totalRejects
+                        - totalTabsShown
+                        - totalTabsAccepted
+                        - composerRequests
+                        - chatRequests
+                        - agentRequests
+                        - cmdkUsages
+                        - subscriptionIncludedReqs
+                        - apiKeyReqs
+                        - usageBasedReqs
+                        - bugbotUsages
+                        - mostUsedModel
+                  period:
+                    type: object
+                    properties:
+                      startDate:
+                        type: integer
+                        description: Start date of the period in epoch milliseconds
+                      endDate:
+                        type: integer
+                        description: End date of the period in epoch milliseconds
+                    required:
+                      - startDate
+                      - endDate
+                required:
+                  - data
+                  - period
+
+  /teams/spend:
+    post:
+      operationId: getSpendingData
+      summary: Get Spending Data
+      description: >
+        Retrieve spending information for the current calendar month with search, 
+        sorting, and pagination.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                searchTerm:
+                  type: string
+                  description: Search in user names and emails
+                sortBy:
+                  type: string
+                  enum: [amount, date, user]
+                  default: date
+                  description: Sort by field
+                sortDirection:
+                  type: string
+                  enum: [asc, desc]
+                  default: desc
+                  description: Sort direction
+                page:
+                  type: integer
+                  default: 1
+                  description: Page number (1-indexed)
+                pageSize:
+                  type: integer
+                  description: Results per page
+            example:
+              searchTerm: "alex@company.com"
+              page: 2
+              pageSize: 25
+      responses:
+        '200':
+          description: Successfully retrieved spending data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  teamMemberSpend:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        spendCents:
+                          type: integer
+                          description: Total spend in cents
+                        fastPremiumRequests:
+                          type: integer
+                          description: Fast premium model requests
+                        name:
+                          type: string
+                          description: Member's name
+                        email:
+                          type: string
+                          description: Member's email
+                        role:
+                          type: string
+                          enum: [owner, member, free-owner]
+                          description: Team role
+                        hardLimitOverrideDollars:
+                          type: integer
+                          description: Custom spending limit override
+                      required:
+                        - spendCents
+                        - fastPremiumRequests
+                        - name
+                        - email
+                        - role
+                        - hardLimitOverrideDollars
+                  subscriptionCycleStart:
+                    type: integer
+                    description: Subscription cycle start (epoch milliseconds)
+                  totalMembers:
+                    type: integer
+                    description: Total team members
+                  totalPages:
+                    type: integer
+                    description: Total pages
+                required:
+                  - teamMemberSpend
+                  - subscriptionCycleStart
+                  - totalMembers
+                  - totalPages
+
+  /teams/filtered-usage-events:
+    post:
+      operationId: getUsageEventsData
+      summary: Get Usage Events Data
+      description: >
+        Retrieve detailed usage events for your team with comprehensive filtering, 
+        search, and pagination options. This endpoint provides granular insights 
+        into individual API calls, model usage, token consumption, and costs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: integer
+                  description: Start date in epoch milliseconds
+                endDate:
+                  type: integer
+                  description: End date in epoch milliseconds
+                userId:
+                  type: integer
+                  description: Filter by specific user ID
+                page:
+                  type: integer
+                  default: 1
+                  description: Page number (1-indexed)
+                pageSize:
+                  type: integer
+                  default: 10
+                  description: Number of results per page
+                email:
+                  type: string
+                  description: Filter by user email address
+            example:
+              startDate: 1748411762359
+              endDate: 1751003762359
+              email: "developer@company.com"
+              page: 1
+              pageSize: 25
+      responses:
+        '200':
+          description: Successfully retrieved usage events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalUsageEventsCount:
+                    type: integer
+                    description: Total number of usage events matching the query
+                  pagination:
+                    type: object
+                    properties:
+                      numPages:
+                        type: integer
+                        description: Total number of pages
+                      currentPage:
+                        type: integer
+                        description: Current page number
+                      pageSize:
+                        type: integer
+                        description: Page size
+                      hasNextPage:
+                        type: boolean
+                        description: Whether there is a next page
+                      hasPreviousPage:
+                        type: boolean
+                        description: Whether there is a previous page
+                    required:
+                      - numPages
+                      - currentPage
+                      - pageSize
+                      - hasNextPage
+                      - hasPreviousPage
+                  usageEvents:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        timestamp:
+                          type: string
+                          description: Event timestamp in epoch milliseconds
+                        model:
+                          type: string
+                          description: AI model used for the request
+                        kind:
+                          type: string
+                          description: Usage category (e.g., "Usage-based", "Included in Business")
+                        maxMode:
+                          type: boolean
+                          description: Whether max mode was enabled
+                        requestsCosts:
+                          type: number
+                          description: Cost in request units
+                        isTokenBasedCall:
+                          type: boolean
+                          description: True when the event is charged as a usage-based event
+                        tokenUsage:
+                          type: object
+                          nullable: true
+                          description: Detailed token consumption (available when isTokenBasedCall is true)
+                          properties:
+                            inputTokens:
+                              type: integer
+                              description: Number of input tokens
+                            outputTokens:
+                              type: integer
+                              description: Number of output tokens
+                            cacheWriteTokens:
+                              type: integer
+                              description: Number of cache write tokens
+                            cacheReadTokens:
+                              type: integer
+                              description: Number of cache read tokens
+                            totalCents:
+                              type: number
+                              description: Total cost in cents
+                          required:
+                            - inputTokens
+                            - outputTokens
+                            - cacheWriteTokens
+                            - cacheReadTokens
+                            - totalCents
+                        isFreeBugbot:
+                          type: boolean
+                          description: Whether this was a free bugbot usage
+                        userEmail:
+                          type: string
+                          description: Email of the user who made the request
+                      required:
+                        - timestamp
+                        - model
+                        - kind
+                        - maxMode
+                        - requestsCosts
+                        - isTokenBasedCall
+                        - isFreeBugbot
+                        - userEmail
+                  period:
+                    type: object
+                    properties:
+                      startDate:
+                        type: integer
+                        description: Start date of the period in epoch milliseconds
+                      endDate:
+                        type: integer
+                        description: End date of the period in epoch milliseconds
+                    required:
+                      - startDate
+                      - endDate
+                required:
+                  - totalUsageEventsCount
+                  - pagination
+                  - usageEvents
+                  - period
+
+  /teams/user-spend-limit:
+    post:
+      operationId: setUserSpendLimit
+      summary: Set User Spend Limit
+      description: >
+        Set spending limits for individual team members. This allows you to 
+        control how much each user can spend on AI usage within your team.
+        Rate limited to 60 requests per minute per team.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userEmail:
+                  type: string
+                  format: email
+                  description: Email address of the team member
+                spendLimitDollars:
+                  type: integer
+                  description: Spending limit in dollars (integer only, no decimals)
+              required:
+                - userEmail
+                - spendLimitDollars
+            example:
+              userEmail: "developer@company.com"
+              spendLimitDollars: 100
+      responses:
+        '200':
+          description: Successfully set or updated spend limit
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  outcome:
+                    type: string
+                    enum: [success, error]
+                    description: Operation outcome
+                  message:
+                    type: string
+                    description: Descriptive message
+                required:
+                  - outcome
+                  - message
+              examples:
+                success:
+                  value:
+                    outcome: "success"
+                    message: "Spend limit set to $100 for user developer@company.com"
+                error:
+                  value:
+                    outcome: "error"
+                    message: "Invalid email format"
+
+  /settings/repo-blocklists/repos:
+    get:
+      operationId: getTeamRepoBlocklists
+      summary: Get Team Repo Blocklists
+      description: Retrieve all repository blocklists configured for your team.
+      responses:
+        '200':
+          description: Successfully retrieved repository blocklists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repos:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Unique repository identifier
+                        url:
+                          type: string
+                          format: uri
+                          description: Repository URL
+                        patterns:
+                          type: array
+                          items:
+                            type: string
+                          description: Array of file patterns to block (glob patterns supported)
+                      required:
+                        - id
+                        - url
+                        - patterns
+                required:
+                  - repos
+              example:
+                repos:
+                  - id: "repo_123"
+                    url: "https://github.com/company/sensitive-repo"
+                    patterns: ["*.env", "config/*", "secrets/**"]
+                  - id: "repo_456"
+                    url: "https://github.com/company/internal-tools"
+                    patterns: ["*"]
+
+  /settings/repo-blocklists/repos/upsert:
+    post:
+      operationId: upsertRepoBlocklists
+      summary: Upsert Repo Blocklists
+      description: >
+        Replace existing repository blocklists for the provided repos.
+        Note: This endpoint will only overwrite the patterns for the repositories 
+        provided. All other repos will be unaffected.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                repos:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        format: uri
+                        description: Repository URL to blocklist
+                      patterns:
+                        type: array
+                        items:
+                          type: string
+                        description: Array of file patterns to block (glob patterns supported)
+                    required:
+                      - url
+                      - patterns
+              required:
+                - repos
+            example:
+              repos:
+                - url: "https://github.com/company/sensitive-repo"
+                  patterns: ["*.env", "config/*", "secrets/**"]
+                - url: "https://github.com/company/internal-tools"
+                  patterns: ["*"]
+      responses:
+        '200':
+          description: Successfully updated repository blocklists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repos:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Unique repository identifier
+                        url:
+                          type: string
+                          format: uri
+                          description: Repository URL
+                        patterns:
+                          type: array
+                          items:
+                            type: string
+                          description: Array of file patterns to block
+                      required:
+                        - id
+                        - url
+                        - patterns
+                required:
+                  - repos
+
+  /settings/repo-blocklists/repos/{repoId}:
+    delete:
+      operationId: deleteRepoBlocklist
+      summary: Delete Repo Blocklist
+      description: Remove a specific repository from the blocklist.
+      parameters:
+        - name: repoId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the repository blocklist to delete
+      responses:
+        '204':
+          description: Successfully deleted repository blocklist
+
+  /analytics/ai-code/commits:
+    get:
+      operationId: getAiCommitMetrics
+      summary: Get AI Commit Metrics (JSON, paginated)
+      description: >
+        Retrieve aggregated per-commit metrics that attribute lines to TAB, COMPOSER, 
+        and non-AI. Only available for enterprise teams. Response shapes may change 
+        during alpha phase.
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+          description: ISO date string, "now", or relative days like "7d" (default now - 7 days)
+        - name: endDate
+          in: query
+          schema:
+            type: string
+          description: ISO date string, "now", or relative days like "0d" (default now)
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Page number (1-based)
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 100
+            maximum: 1000
+          description: Results per page
+        - name: user
+          in: query
+          schema:
+            type: string
+          description: Filter by user (email, encoded ID like user_abc123, or numeric ID)
+      responses:
+        '200':
+          description: Successfully retrieved AI commit metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AiCommitMetric'
+                  totalCount:
+                    type: integer
+                    description: Total number of commits matching the query
+                  page:
+                    type: integer
+                    description: Current page number
+                  pageSize:
+                    type: integer
+                    description: Page size used
+                required:
+                  - items
+                  - totalCount
+                  - page
+                  - pageSize
+
+  /analytics/ai-code/commits.csv:
+    get:
+      operationId: downloadAiCommitMetricsCsv
+      summary: Download AI Commit Metrics (CSV, streaming)
+      description: >
+        Download commit metrics data in CSV format for large data extractions.
+        Streams in pages of 10,000 records server-side.
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+          description: ISO date string, "now", or relative days like "7d"
+        - name: endDate
+          in: query
+          schema:
+            type: string
+          description: ISO date string, "now", or relative days like "0d"
+        - name: user
+          in: query
+          schema:
+            type: string
+          description: Filter by user (email, encoded ID like user_abc123, or numeric ID)
+      responses:
+        '200':
+          description: CSV file with commit metrics
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+              example: |
+                commit_hash,user_id,user_email,repo_name,branch_name,is_primary_branch,total_lines_added,total_lines_deleted,tab_lines_added,tab_lines_deleted,composer_lines_added,composer_lines_deleted,non_ai_lines_added,non_ai_lines_deleted,message,commit_ts,created_at
+                a1b2c3d4,user_3k9x8q...,developer@company.com,company/repo,main,true,120,30,50,10,40,5,30,15,"Refactor: extract analytics client",2025-07-30T14:12:03.000Z,2025-07-30T14:12:30.000Z
+
+  /analytics/ai-code/changes:
+    get:
+      operationId: getAiCodeChangeMetrics
+      summary: Get AI Code Change Metrics (JSON, paginated)
+      description: >
+        Retrieve granular accepted AI changes, grouped by deterministic changeId.
+        Useful to analyze accepted AI events independent of commits.
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+          description: ISO date string, "now", or relative days like "14d"
+        - name: endDate
+          in: query
+          schema:
+            type: string
+          description: ISO date string, "now", or relative days like "0d"
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Page number (1-based)
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 100
+            maximum: 1000
+          description: Results per page
+        - name: user
+          in: query
+          schema:
+            type: string
+          description: Filter by user (email, encoded ID like user_abc123, or numeric ID)
+      responses:
+        '200':
+          description: Successfully retrieved AI code change metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AiCodeChangeMetric'
+                  totalCount:
+                    type: integer
+                    description: Total number of changes matching the query
+                  page:
+                    type: integer
+                    description: Current page number
+                  pageSize:
+                    type: integer
+                    description: Page size used
+                required:
+                  - items
+                  - totalCount
+                  - page
+                  - pageSize
+
+  /analytics/ai-code/changes.csv:
+    get:
+      operationId: downloadAiCodeChangeMetricsCsv
+      summary: Download AI Code Change Metrics (CSV, streaming)
+      description: >
+        Download change metrics data in CSV format for large data extractions.
+        Streams in pages of 10,000 records server-side.
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+          description: ISO date string, "now", or relative days like "30d"
+        - name: endDate
+          in: query
+          schema:
+            type: string
+          description: ISO date string, "now", or relative days like "0d"
+        - name: user
+          in: query
+          schema:
+            type: string
+          description: Filter by user (email, encoded ID like user_abc123, or numeric ID)
+      responses:
+        '200':
+          description: CSV file with AI code change metrics
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+              example: |
+                change_id,user_id,user_email,source,model,total_lines_added,total_lines_deleted,created_at,metadata_json
+                749356201,user_3k9x8q...,developer@company.com,COMPOSER,gpt-4o,18,4,2025-07-30T15:10:12.000Z,"[{""fileName"":""src/analytics/report.ts"",""fileExtension"":""ts"",""linesAdded"":12,""linesDeleted"":3}]"
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: >
+        Use your API key as the username with an empty password. 
+        Format: Authorization: Basic {base64_encode('API_KEY:')}
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        outcome:
+          type: string
+          enum: [error]
+        message:
+          type: string
+      required:
+        - outcome
+        - message
+
+    AiCommitMetric:
+      type: object
+      properties:
+        commitHash:
+          type: string
+          description: Git commit hash
+        userId:
+          type: string
+          description: Encoded user ID (e.g., user_abc123)
+        userEmail:
+          type: string
+          description: User's email address
+        repoName:
+          type: string
+          nullable: true
+          description: Repository name
+        branchName:
+          type: string
+          nullable: true
+          description: Branch name
+        isPrimaryBranch:
+          type: boolean
+          nullable: true
+          description: Whether this is the primary branch
+        totalLinesAdded:
+          type: integer
+          description: Total lines added in commit
+        totalLinesDeleted:
+          type: integer
+          description: Total lines deleted in commit
+        tabLinesAdded:
+          type: integer
+          description: Lines added via TAB completions
+        tabLinesDeleted:
+          type: integer
+          description: Lines deleted via TAB completions
+        composerLinesAdded:
+          type: integer
+          description: Lines added via Composer
+        composerLinesDeleted:
+          type: integer
+          description: Lines deleted via Composer
+        nonAiLinesAdded:
+          type: integer
+          nullable: true
+          description: Non-AI lines added
+        nonAiLinesDeleted:
+          type: integer
+          nullable: true
+          description: Non-AI lines deleted
+        message:
+          type: string
+          nullable: true
+          description: Commit message
+        commitTs:
+          type: string
+          format: date-time
+          nullable: true
+          description: Commit timestamp (ISO format)
+        createdAt:
+          type: string
+          format: date-time
+          description: Ingestion timestamp (ISO format)
+      required:
+        - commitHash
+        - userId
+        - userEmail
+        - totalLinesAdded
+        - totalLinesDeleted
+        - tabLinesAdded
+        - tabLinesDeleted
+        - composerLinesAdded
+        - composerLinesDeleted
+        - createdAt
+
+    AiCodeChangeMetric:
+      type: object
+      properties:
+        changeId:
+          type: string
+          description: Deterministic ID for the change
+        userId:
+          type: string
+          description: Encoded user ID (e.g., user_abc123)
+        userEmail:
+          type: string
+          description: User's email address
+        source:
+          type: string
+          enum: [TAB, COMPOSER]
+          description: Source of the AI change
+        model:
+          type: string
+          nullable: true
+          description: AI model used
+        totalLinesAdded:
+          type: integer
+          description: Total lines added
+        totalLinesDeleted:
+          type: integer
+          description: Total lines deleted
+        createdAt:
+          type: string
+          format: date-time
+          description: Ingestion timestamp (ISO format)
+        metadata:
+          type: array
+          items:
+            type: object
+            properties:
+              fileName:
+                type: string
+                nullable: true
+                description: File name (may be omitted in privacy mode)
+              fileExtension:
+                type: string
+                description: File extension
+              linesAdded:
+                type: integer
+                description: Lines added in this file
+              linesDeleted:
+                type: integer
+                description: Lines deleted in this file
+            required:
+              - fileExtension
+              - linesAdded
+              - linesDeleted
+          description: File metadata (fileName may be omitted in privacy mode)
+      required:
+        - changeId
+        - userId
+        - userEmail
+        - source
+        - totalLinesAdded
+        - totalLinesDeleted
+        - createdAt
+        - metadata
+
+tags:
+  - name: Team Management
+    description: Operations related to team member management
+  - name: Usage Analytics
+    description: Operations for retrieving usage and analytics data
+  - name: Spending Control
+    description: Operations for managing spending limits and costs
+  - name: Repository Management
+    description: Operations for managing repository blocklists
+  - name: AI Code Tracking
+    description: Track AI-generated code contributions and metrics (Enterprise only, Alpha)

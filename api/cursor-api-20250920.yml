@@ -32,29 +32,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  teamMembers:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                          description: Member's name
-                        email:
-                          type: string
-                          description: Member's email address
-                        role:
-                          type: string
-                          enum: [owner, member, free-owner]
-                          description: Member's role in the team
-                      required:
-                        - name
-                        - email
-                        - role
-                required:
-                  - teamMembers
+                $ref: '#/components/schemas/TeamMembersResponse'
               example:
                 teamMembers:
                   - name: "Alex"
@@ -77,17 +55,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                startDate:
-                  type: integer
-                  description: Start date in epoch milliseconds
-                endDate:
-                  type: integer
-                  description: End date in epoch milliseconds
-              required:
-                - startDate
-                - endDate
+              $ref: '#/components/schemas/DailyUsageDataRequest'
             example:
               startDate: 1710720000000
               endDate: 1710892800000
@@ -97,125 +65,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        date:
-                          type: integer
-                          description: Date in epoch milliseconds
-                        isActive:
-                          type: boolean
-                          description: User active on this day
-                        totalLinesAdded:
-                          type: integer
-                          description: Lines of code added
-                        totalLinesDeleted:
-                          type: integer
-                          description: Lines of code deleted
-                        acceptedLinesAdded:
-                          type: integer
-                          description: Lines added from accepted AI suggestions
-                        acceptedLinesDeleted:
-                          type: integer
-                          description: Lines deleted from accepted AI suggestions
-                        totalApplies:
-                          type: integer
-                          description: Apply operations
-                        totalAccepts:
-                          type: integer
-                          description: Accepted suggestions
-                        totalRejects:
-                          type: integer
-                          description: Rejected suggestions
-                        totalTabsShown:
-                          type: integer
-                          description: Tab completions shown
-                        totalTabsAccepted:
-                          type: integer
-                          description: Tab completions accepted
-                        composerRequests:
-                          type: integer
-                          description: Composer requests
-                        chatRequests:
-                          type: integer
-                          description: Chat requests
-                        agentRequests:
-                          type: integer
-                          description: Agent requests
-                        cmdkUsages:
-                          type: integer
-                          description: Command palette (Cmd+K) uses
-                        subscriptionIncludedReqs:
-                          type: integer
-                          description: Subscription requests
-                        apiKeyReqs:
-                          type: integer
-                          description: API key requests
-                        usageBasedReqs:
-                          type: integer
-                          description: Pay-per-use requests
-                        bugbotUsages:
-                          type: integer
-                          description: Bug detection uses
-                        mostUsedModel:
-                          type: string
-                          description: Most frequent AI model
-                        applyMostUsedExtension:
-                          type: string
-                          nullable: true
-                          description: Most used file extension for applies
-                        tabMostUsedExtension:
-                          type: string
-                          nullable: true
-                          description: Most used file extension for tabs
-                        clientVersion:
-                          type: string
-                          nullable: true
-                          description: Cursor version
-                        email:
-                          type: string
-                          nullable: true
-                          description: User email
-                      required:
-                        - date
-                        - isActive
-                        - totalLinesAdded
-                        - totalLinesDeleted
-                        - acceptedLinesAdded
-                        - acceptedLinesDeleted
-                        - totalApplies
-                        - totalAccepts
-                        - totalRejects
-                        - totalTabsShown
-                        - totalTabsAccepted
-                        - composerRequests
-                        - chatRequests
-                        - agentRequests
-                        - cmdkUsages
-                        - subscriptionIncludedReqs
-                        - apiKeyReqs
-                        - usageBasedReqs
-                        - bugbotUsages
-                        - mostUsedModel
-                  period:
-                    type: object
-                    properties:
-                      startDate:
-                        type: integer
-                        description: Start date of the period in epoch milliseconds
-                      endDate:
-                        type: integer
-                        description: End date of the period in epoch milliseconds
-                    required:
-                      - startDate
-                      - endDate
-                required:
-                  - data
-                  - period
+                $ref: '#/components/schemas/DailyUsageDataResponse'
 
   /teams/spend:
     post:
@@ -229,28 +79,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                searchTerm:
-                  type: string
-                  description: Search in user names and emails
-                sortBy:
-                  type: string
-                  enum: [amount, date, user]
-                  default: date
-                  description: Sort by field
-                sortDirection:
-                  type: string
-                  enum: [asc, desc]
-                  default: desc
-                  description: Sort direction
-                page:
-                  type: integer
-                  default: 1
-                  description: Page number (1-indexed)
-                pageSize:
-                  type: integer
-                  description: Results per page
+              $ref: '#/components/schemas/SpendingDataRequest'
             example:
               searchTerm: "alex@company.com"
               page: 2
@@ -261,53 +90,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  teamMemberSpend:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        spendCents:
-                          type: integer
-                          description: Total spend in cents
-                        fastPremiumRequests:
-                          type: integer
-                          description: Fast premium model requests
-                        name:
-                          type: string
-                          description: Member's name
-                        email:
-                          type: string
-                          description: Member's email
-                        role:
-                          type: string
-                          enum: [owner, member, free-owner]
-                          description: Team role
-                        hardLimitOverrideDollars:
-                          type: integer
-                          description: Custom spending limit override
-                      required:
-                        - spendCents
-                        - fastPremiumRequests
-                        - name
-                        - email
-                        - role
-                        - hardLimitOverrideDollars
-                  subscriptionCycleStart:
-                    type: integer
-                    description: Subscription cycle start (epoch milliseconds)
-                  totalMembers:
-                    type: integer
-                    description: Total team members
-                  totalPages:
-                    type: integer
-                    description: Total pages
-                required:
-                  - teamMemberSpend
-                  - subscriptionCycleStart
-                  - totalMembers
-                  - totalPages
+                $ref: '#/components/schemas/SpendingDataResponse'
 
   /teams/filtered-usage-events:
     post:
@@ -322,28 +105,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                startDate:
-                  type: integer
-                  description: Start date in epoch milliseconds
-                endDate:
-                  type: integer
-                  description: End date in epoch milliseconds
-                userId:
-                  type: integer
-                  description: Filter by specific user ID
-                page:
-                  type: integer
-                  default: 1
-                  description: Page number (1-indexed)
-                pageSize:
-                  type: integer
-                  default: 10
-                  description: Number of results per page
-                email:
-                  type: string
-                  description: Filter by user email address
+              $ref: '#/components/schemas/UsageEventsDataRequest'
             example:
               startDate: 1748411762359
               endDate: 1751003762359
@@ -356,116 +118,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  totalUsageEventsCount:
-                    type: integer
-                    description: Total number of usage events matching the query
-                  pagination:
-                    type: object
-                    properties:
-                      numPages:
-                        type: integer
-                        description: Total number of pages
-                      currentPage:
-                        type: integer
-                        description: Current page number
-                      pageSize:
-                        type: integer
-                        description: Page size
-                      hasNextPage:
-                        type: boolean
-                        description: Whether there is a next page
-                      hasPreviousPage:
-                        type: boolean
-                        description: Whether there is a previous page
-                    required:
-                      - numPages
-                      - currentPage
-                      - pageSize
-                      - hasNextPage
-                      - hasPreviousPage
-                  usageEvents:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        timestamp:
-                          type: string
-                          description: Event timestamp in epoch milliseconds
-                        model:
-                          type: string
-                          description: AI model used for the request
-                        kind:
-                          type: string
-                          description: Usage category (e.g., "Usage-based", "Included in Business")
-                        maxMode:
-                          type: boolean
-                          description: Whether max mode was enabled
-                        requestsCosts:
-                          type: number
-                          description: Cost in request units
-                        isTokenBasedCall:
-                          type: boolean
-                          description: True when the event is charged as a usage-based event
-                        tokenUsage:
-                          type: object
-                          nullable: true
-                          description: Detailed token consumption (available when isTokenBasedCall is true)
-                          properties:
-                            inputTokens:
-                              type: integer
-                              description: Number of input tokens
-                            outputTokens:
-                              type: integer
-                              description: Number of output tokens
-                            cacheWriteTokens:
-                              type: integer
-                              description: Number of cache write tokens
-                            cacheReadTokens:
-                              type: integer
-                              description: Number of cache read tokens
-                            totalCents:
-                              type: number
-                              description: Total cost in cents
-                          required:
-                            - inputTokens
-                            - outputTokens
-                            - cacheWriteTokens
-                            - cacheReadTokens
-                            - totalCents
-                        isFreeBugbot:
-                          type: boolean
-                          description: Whether this was a free bugbot usage
-                        userEmail:
-                          type: string
-                          description: Email of the user who made the request
-                      required:
-                        - timestamp
-                        - model
-                        - kind
-                        - maxMode
-                        - requestsCosts
-                        - isTokenBasedCall
-                        - isFreeBugbot
-                        - userEmail
-                  period:
-                    type: object
-                    properties:
-                      startDate:
-                        type: integer
-                        description: Start date of the period in epoch milliseconds
-                      endDate:
-                        type: integer
-                        description: End date of the period in epoch milliseconds
-                    required:
-                      - startDate
-                      - endDate
-                required:
-                  - totalUsageEventsCount
-                  - pagination
-                  - usageEvents
-                  - period
+                $ref: '#/components/schemas/UsageEventsDataResponse'
 
   /teams/user-spend-limit:
     post:
@@ -480,18 +133,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                userEmail:
-                  type: string
-                  format: email
-                  description: Email address of the team member
-                spendLimitDollars:
-                  type: integer
-                  description: Spending limit in dollars (integer only, no decimals)
-              required:
-                - userEmail
-                - spendLimitDollars
+              $ref: '#/components/schemas/UserSpendLimitRequest'
             example:
               userEmail: "developer@company.com"
               spendLimitDollars: 100
@@ -501,18 +143,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  outcome:
-                    type: string
-                    enum: [success, error]
-                    description: Operation outcome
-                  message:
-                    type: string
-                    description: Descriptive message
-                required:
-                  - outcome
-                  - message
+                $ref: '#/components/schemas/UserSpendLimitResponse'
               examples:
                 success:
                   value:
@@ -534,31 +165,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  repos:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                          description: Unique repository identifier
-                        url:
-                          type: string
-                          format: uri
-                          description: Repository URL
-                        patterns:
-                          type: array
-                          items:
-                            type: string
-                          description: Array of file patterns to block (glob patterns supported)
-                      required:
-                        - id
-                        - url
-                        - patterns
-                required:
-                  - repos
+                $ref: '#/components/schemas/RepoBlocklistsResponse'
               example:
                 repos:
                   - id: "repo_123"
@@ -581,27 +188,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                repos:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      url:
-                        type: string
-                        format: uri
-                        description: Repository URL to blocklist
-                      patterns:
-                        type: array
-                        items:
-                          type: string
-                        description: Array of file patterns to block (glob patterns supported)
-                    required:
-                      - url
-                      - patterns
-              required:
-                - repos
+              $ref: '#/components/schemas/UpsertRepoBlocklistsRequest'
             example:
               repos:
                 - url: "https://github.com/company/sensitive-repo"
@@ -614,31 +201,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  repos:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                          description: Unique repository identifier
-                        url:
-                          type: string
-                          format: uri
-                          description: Repository URL
-                        patterns:
-                          type: array
-                          items:
-                            type: string
-                          description: Array of file patterns to block
-                      required:
-                        - id
-                        - url
-                        - patterns
-                required:
-                  - repos
+                $ref: '#/components/schemas/RepoBlocklistsResponse'
 
   /settings/repo-blocklists/repos/{repoId}:
     delete:
@@ -699,26 +262,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/AiCommitMetric'
-                  totalCount:
-                    type: integer
-                    description: Total number of commits matching the query
-                  page:
-                    type: integer
-                    description: Current page number
-                  pageSize:
-                    type: integer
-                    description: Page size used
-                required:
-                  - items
-                  - totalCount
-                  - page
-                  - pageSize
+                $ref: '#/components/schemas/AiCommitMetricsResponse'
 
   /analytics/ai-code/commits.csv:
     get:
@@ -797,26 +341,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/AiCodeChangeMetric'
-                  totalCount:
-                    type: integer
-                    description: Total number of changes matching the query
-                  page:
-                    type: integer
-                    description: Current page number
-                  pageSize:
-                    type: integer
-                    description: Page size used
-                required:
-                  - items
-                  - totalCount
-                  - page
-                  - pageSize
+                $ref: '#/components/schemas/AiCodeChangeMetricsResponse'
 
   /analytics/ai-code/changes.csv:
     get:
@@ -866,25 +391,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  apiKeyName:
-                    type: string
-                    description: The name of the API key
-                    example: "Production API Key"
-                  createdAt:
-                    type: string
-                    format: date-time
-                    description: When the API key was created
-                    example: "2024-01-15T10:30:00Z"
-                  userEmail:
-                    type: string
-                    format: email
-                    description: Email address of the user who owns the API key (if available)
-                    example: "developer@example.com"
-                required:
-                  - apiKeyName
-                  - createdAt
+                $ref: '#/components/schemas/ApiKeyInfoResponse'
         '401':
           description: Unauthorized - Invalid or missing API key
         '404':
@@ -921,6 +428,555 @@ components:
       required:
         - outcome
         - message
+
+    TeamMember:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Member's name
+        email:
+          type: string
+          description: Member's email address
+        role:
+          type: string
+          enum: [owner, member, free-owner]
+          description: Member's role in the team
+      required:
+        - name
+        - email
+        - role
+
+    TeamMembersResponse:
+      type: object
+      properties:
+        teamMembers:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMember'
+      required:
+        - teamMembers
+
+    DailyUsageDataRequest:
+      type: object
+      properties:
+        startDate:
+          type: integer
+          description: Start date in epoch milliseconds
+        endDate:
+          type: integer
+          description: End date in epoch milliseconds
+      required:
+        - startDate
+        - endDate
+
+    DailyUsageData:
+      type: object
+      properties:
+        date:
+          type: integer
+          description: Date in epoch milliseconds
+        isActive:
+          type: boolean
+          description: User active on this day
+        totalLinesAdded:
+          type: integer
+          description: Lines of code added
+        totalLinesDeleted:
+          type: integer
+          description: Lines of code deleted
+        acceptedLinesAdded:
+          type: integer
+          description: Lines added from accepted AI suggestions
+        acceptedLinesDeleted:
+          type: integer
+          description: Lines deleted from accepted AI suggestions
+        totalApplies:
+          type: integer
+          description: Apply operations
+        totalAccepts:
+          type: integer
+          description: Accepted suggestions
+        totalRejects:
+          type: integer
+          description: Rejected suggestions
+        totalTabsShown:
+          type: integer
+          description: Tab completions shown
+        totalTabsAccepted:
+          type: integer
+          description: Tab completions accepted
+        composerRequests:
+          type: integer
+          description: Composer requests
+        chatRequests:
+          type: integer
+          description: Chat requests
+        agentRequests:
+          type: integer
+          description: Agent requests
+        cmdkUsages:
+          type: integer
+          description: Command palette (Cmd+K) uses
+        subscriptionIncludedReqs:
+          type: integer
+          description: Subscription requests
+        apiKeyReqs:
+          type: integer
+          description: API key requests
+        usageBasedReqs:
+          type: integer
+          description: Pay-per-use requests
+        bugbotUsages:
+          type: integer
+          description: Bug detection uses
+        mostUsedModel:
+          type: string
+          description: Most frequent AI model
+        applyMostUsedExtension:
+          type: string
+          nullable: true
+          description: Most used file extension for applies
+        tabMostUsedExtension:
+          type: string
+          nullable: true
+          description: Most used file extension for tabs
+        clientVersion:
+          type: string
+          nullable: true
+          description: Cursor version
+        email:
+          type: string
+          nullable: true
+          description: User email
+      required:
+        - date
+        - isActive
+        - totalLinesAdded
+        - totalLinesDeleted
+        - acceptedLinesAdded
+        - acceptedLinesDeleted
+        - totalApplies
+        - totalAccepts
+        - totalRejects
+        - totalTabsShown
+        - totalTabsAccepted
+        - composerRequests
+        - chatRequests
+        - agentRequests
+        - cmdkUsages
+        - subscriptionIncludedReqs
+        - apiKeyReqs
+        - usageBasedReqs
+        - bugbotUsages
+        - mostUsedModel
+
+    DatePeriod:
+      type: object
+      properties:
+        startDate:
+          type: integer
+          description: Start date of the period in epoch milliseconds
+        endDate:
+          type: integer
+          description: End date of the period in epoch milliseconds
+      required:
+        - startDate
+        - endDate
+
+    DailyUsageDataResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyUsageData'
+        period:
+          $ref: '#/components/schemas/DatePeriod'
+      required:
+        - data
+        - period
+
+    SpendingDataRequest:
+      type: object
+      properties:
+        searchTerm:
+          type: string
+          description: Search in user names and emails
+        sortBy:
+          type: string
+          enum: [amount, date, user]
+          default: date
+          description: Sort by field
+        sortDirection:
+          type: string
+          enum: [asc, desc]
+          default: desc
+          description: Sort direction
+        page:
+          type: integer
+          default: 1
+          description: Page number (1-indexed)
+        pageSize:
+          type: integer
+          description: Results per page
+
+    TeamMemberSpend:
+      type: object
+      properties:
+        spendCents:
+          type: integer
+          description: Total spend in cents
+        fastPremiumRequests:
+          type: integer
+          description: Fast premium model requests
+        name:
+          type: string
+          description: Member's name
+        email:
+          type: string
+          description: Member's email
+        role:
+          type: string
+          enum: [owner, member, free-owner]
+          description: Team role
+        hardLimitOverrideDollars:
+          type: integer
+          description: Custom spending limit override
+      required:
+        - spendCents
+        - fastPremiumRequests
+        - name
+        - email
+        - role
+        - hardLimitOverrideDollars
+
+    SpendingDataResponse:
+      type: object
+      properties:
+        teamMemberSpend:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMemberSpend'
+        subscriptionCycleStart:
+          type: integer
+          description: Subscription cycle start (epoch milliseconds)
+        totalMembers:
+          type: integer
+          description: Total team members
+        totalPages:
+          type: integer
+          description: Total pages
+      required:
+        - teamMemberSpend
+        - subscriptionCycleStart
+        - totalMembers
+        - totalPages
+
+    UsageEventsDataRequest:
+      type: object
+      properties:
+        startDate:
+          type: integer
+          description: Start date in epoch milliseconds
+        endDate:
+          type: integer
+          description: End date in epoch milliseconds
+        userId:
+          type: integer
+          description: Filter by specific user ID
+        page:
+          type: integer
+          default: 1
+          description: Page number (1-indexed)
+        pageSize:
+          type: integer
+          default: 10
+          description: Number of results per page
+        email:
+          type: string
+          description: Filter by user email address
+
+    UsageEventsPagination:
+      type: object
+      properties:
+        numPages:
+          type: integer
+          description: Total number of pages
+        currentPage:
+          type: integer
+          description: Current page number
+        pageSize:
+          type: integer
+          description: Page size
+        hasNextPage:
+          type: boolean
+          description: Whether there is a next page
+        hasPreviousPage:
+          type: boolean
+          description: Whether there is a previous page
+      required:
+        - numPages
+        - currentPage
+        - pageSize
+        - hasNextPage
+        - hasPreviousPage
+
+    TokenUsage:
+      type: object
+      properties:
+        inputTokens:
+          type: integer
+          description: Number of input tokens
+        outputTokens:
+          type: integer
+          description: Number of output tokens
+        cacheWriteTokens:
+          type: integer
+          description: Number of cache write tokens
+        cacheReadTokens:
+          type: integer
+          description: Number of cache read tokens
+        totalCents:
+          type: number
+          description: Total cost in cents
+      required:
+        - inputTokens
+        - outputTokens
+        - cacheWriteTokens
+        - cacheReadTokens
+        - totalCents
+
+    UsageEvent:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          description: Event timestamp in epoch milliseconds
+        model:
+          type: string
+          description: AI model used for the request
+        kind:
+          type: string
+          description: Usage category (e.g., "Usage-based", "Included in Business")
+        maxMode:
+          type: boolean
+          description: Whether max mode was enabled
+        requestsCosts:
+          type: number
+          description: Cost in request units
+        isTokenBasedCall:
+          type: boolean
+          description: True when the event is charged as a usage-based event
+        tokenUsage:
+          $ref: '#/components/schemas/TokenUsage'
+          nullable: true
+          description: Detailed token consumption (available when isTokenBasedCall is true)
+        isFreeBugbot:
+          type: boolean
+          description: Whether this was a free bugbot usage
+        userEmail:
+          type: string
+          description: Email of the user who made the request
+      required:
+        - timestamp
+        - model
+        - kind
+        - maxMode
+        - requestsCosts
+        - isTokenBasedCall
+        - isFreeBugbot
+        - userEmail
+
+    UsageEventsDataResponse:
+      type: object
+      properties:
+        totalUsageEventsCount:
+          type: integer
+          description: Total number of usage events matching the query
+        pagination:
+          $ref: '#/components/schemas/UsageEventsPagination'
+        usageEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/UsageEvent'
+        period:
+          $ref: '#/components/schemas/DatePeriod'
+      required:
+        - totalUsageEventsCount
+        - pagination
+        - usageEvents
+        - period
+
+    UserSpendLimitRequest:
+      type: object
+      properties:
+        userEmail:
+          type: string
+          format: email
+          description: Email address of the team member
+        spendLimitDollars:
+          type: integer
+          description: Spending limit in dollars (integer only, no decimals)
+      required:
+        - userEmail
+        - spendLimitDollars
+
+    UserSpendLimitResponse:
+      type: object
+      properties:
+        outcome:
+          type: string
+          enum: [success, error]
+          description: Operation outcome
+        message:
+          type: string
+          description: Descriptive message
+      required:
+        - outcome
+        - message
+
+    RepoBlocklist:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique repository identifier
+        url:
+          type: string
+          format: uri
+          description: Repository URL
+        patterns:
+          type: array
+          items:
+            type: string
+          description: Array of file patterns to block (glob patterns supported)
+      required:
+        - id
+        - url
+        - patterns
+
+    RepoBlocklistsResponse:
+      type: object
+      properties:
+        repos:
+          type: array
+          items:
+            $ref: '#/components/schemas/RepoBlocklist'
+      required:
+        - repos
+
+    RepoBlocklistInput:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Repository URL to blocklist
+        patterns:
+          type: array
+          items:
+            type: string
+          description: Array of file patterns to block (glob patterns supported)
+      required:
+        - url
+        - patterns
+
+    UpsertRepoBlocklistsRequest:
+      type: object
+      properties:
+        repos:
+          type: array
+          items:
+            $ref: '#/components/schemas/RepoBlocklistInput'
+      required:
+        - repos
+
+    AiCommitMetricsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AiCommitMetric'
+        totalCount:
+          type: integer
+          description: Total number of commits matching the query
+        page:
+          type: integer
+          description: Current page number
+        pageSize:
+          type: integer
+          description: Page size used
+      required:
+        - items
+        - totalCount
+        - page
+        - pageSize
+
+    FileMetadata:
+      type: object
+      properties:
+        fileName:
+          type: string
+          nullable: true
+          description: File name (may be omitted in privacy mode)
+        fileExtension:
+          type: string
+          description: File extension
+        linesAdded:
+          type: integer
+          description: Lines added in this file
+        linesDeleted:
+          type: integer
+          description: Lines deleted in this file
+      required:
+        - fileExtension
+        - linesAdded
+        - linesDeleted
+
+    AiCodeChangeMetricsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AiCodeChangeMetric'
+        totalCount:
+          type: integer
+          description: Total number of changes matching the query
+        page:
+          type: integer
+          description: Current page number
+        pageSize:
+          type: integer
+          description: Page size used
+      required:
+        - items
+        - totalCount
+        - page
+        - pageSize
+
+    ApiKeyInfoResponse:
+      type: object
+      properties:
+        apiKeyName:
+          type: string
+          description: The name of the API key
+          example: "Production API Key"
+        createdAt:
+          type: string
+          format: date-time
+          description: When the API key was created
+          example: "2024-01-15T10:30:00Z"
+        userEmail:
+          type: string
+          format: email
+          description: Email address of the user who owns the API key (if available)
+          example: "developer@example.com"
+      required:
+        - apiKeyName
+        - createdAt
 
     AiCommitMetric:
       type: object
@@ -1030,25 +1086,7 @@ components:
         metadata:
           type: array
           items:
-            type: object
-            properties:
-              fileName:
-                type: string
-                nullable: true
-                description: File name (may be omitted in privacy mode)
-              fileExtension:
-                type: string
-                description: File extension
-              linesAdded:
-                type: integer
-                description: Lines added in this file
-              linesDeleted:
-                type: integer
-                description: Lines deleted in this file
-            required:
-              - fileExtension
-              - linesAdded
-              - linesDeleted
+            $ref: '#/components/schemas/FileMetadata'
           description: File metadata (fileName may be omitted in privacy mode)
       required:
         - changeId

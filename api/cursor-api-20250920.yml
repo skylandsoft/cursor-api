@@ -18,6 +18,7 @@ servers:
 
 security:
   - basicAuth: []
+  - bearerAuth: []
 
 paths:
   /teams/members:
@@ -668,12 +669,12 @@ paths:
           in: query
           schema:
             type: string
-          description: ISO date string, "now", or relative days like "7d" (default now - 7 days)
+          description: ISO date string, "now", or relative days like "7d" (default: now - 7 days)
         - name: endDate
           in: query
           schema:
             type: string
-          description: ISO date string, "now", or relative days like "0d" (default now)
+          description: ISO date string, "now", or relative days like "0d" (default: now)
         - name: page
           in: query
           schema:
@@ -852,6 +853,47 @@ paths:
                 change_id,user_id,user_email,source,model,total_lines_added,total_lines_deleted,created_at,metadata_json
                 749356201,user_3k9x8q...,developer@company.com,COMPOSER,gpt-4o,18,4,2025-07-30T15:10:12.000Z,"[{""fileName"":""src/analytics/report.ts"",""fileExtension"":""ts"",""linesAdded"":12,""linesDeleted"":3}]"
 
+  /v0/me:
+    get:
+      operationId: getApiKeyInfo
+      summary: API Key Info
+      description: Retrieve metadata about the API key used for authentication.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: API key information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  apiKeyName:
+                    type: string
+                    description: The name of the API key
+                    example: "Production API Key"
+                  createdAt:
+                    type: string
+                    format: date-time
+                    description: When the API key was created
+                    example: "2024-01-15T10:30:00Z"
+                  userEmail:
+                    type: string
+                    format: email
+                    description: Email address of the user who owns the API key (if available)
+                    example: "developer@example.com"
+                required:
+                  - apiKeyName
+                  - createdAt
+        '401':
+          description: Unauthorized - Invalid or missing API key
+        '404':
+          description: API key not found
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+
 components:
   securitySchemes:
     basicAuth:
@@ -860,6 +902,12 @@ components:
       description: >
         Use your API key as the username with an empty password. 
         Format: Authorization: Basic {base64_encode('API_KEY:')}
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: >
+        Use your API key as a Bearer token.
+        Format: Authorization: Bearer {API_KEY}
 
   schemas:
     Error:
@@ -1023,3 +1071,5 @@ tags:
     description: Operations for managing repository blocklists
   - name: AI Code Tracking
     description: Track AI-generated code contributions and metrics (Enterprise only, Alpha)
+  - name: Background Agent API
+    description: Background Agent API operations for authentication and key management

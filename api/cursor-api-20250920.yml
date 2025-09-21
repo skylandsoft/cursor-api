@@ -669,12 +669,12 @@ paths:
           in: query
           schema:
             type: string
-          description: ISO date string, "now", or relative days like "7d" (default: now - 7 days)
+          description: ISO date string, "now", or relative days like "7d" (default now - 7 days)
         - name: endDate
           in: query
           schema:
             type: string
-          description: ISO date string, "now", or relative days like "0d" (default: now)
+          description: ISO date string, "now", or relative days like "0d" (default now)
         - name: page
           in: query
           schema:
